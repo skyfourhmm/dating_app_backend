@@ -18,7 +18,7 @@ router.get("/allUser", async (req, res) => {
   }
 });
 
-router.put("/updateMatched/:userId", async (req, res) => {
+router.put("/update/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const updateData = req.body;
