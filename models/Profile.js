@@ -16,5 +16,6 @@ const profileSchema = new mongoose.Schema({
   enjoys: [String],
   communicates: [String],
   listMatched: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  listMessenger: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 export default mongoose.model("Profile", profileSchema, "profile");
