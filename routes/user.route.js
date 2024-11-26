@@ -18,6 +18,17 @@ router.get("/allUser", async (req, res) => {
   }
 });
 
+router.get("/allAccount", async (req, res) => {
+  try {
+    const account = await User.find();
+    if (!account) return res.status(404).json({ message: "Profile not found" });
+
+    return res.status(200).json({ account });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error });
+  }
+});
+
 router.put("/update/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
