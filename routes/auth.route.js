@@ -41,4 +41,91 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Đăng ký
+router.post("/register", async (req, res) => {
+  const {
+    isPhoneNumberSignUp,
+    isName,
+    selectedAge,
+    isGender,
+    isJob,
+    isDescription,
+    isLanguage,
+    chipsData,
+    signUpPass,
+  } = req.body;
+
+  // Dữ liệu mặc định
+  const imageUrl = { mainPhoto: "", otherPhotos: [] };
+  const address = "";
+  const tags = [];
+  const listMatched = [];
+  const listMessenger = [];
+
+  // Kiểm tra dữ liệu đầu vào
+  if (!isPhoneNumberSignUp || !signUpPass) {
+    return res.status(400).json({ message: "Thiếu thông tin cần thiết" });
+  }
+
+  try {
+    // Kiểm tra xem người dùng đã tồn tại chưa
+    const existingUser = await User.findOne({
+      "loginInfo.username": isPhoneNumberSignUp,
+    });
+    if (existingUser) {
+      return res.status(400).json({ message: "Số điện thoại đã được sử dụng" });
+    }
+
+    // Mã hóa mật khẩu
+    const passwordHash = await bcrypt.hash(signUpPass, 10);
+
+    // Tạo người dùng mới
+    const newUser = new User({
+      profileId: newProfile._id,
+      loginInfo: {
+        username: phoneNumber,
+        passwordHash,
+        lastLogin: new Date(),
+        isActive: true,
+        failedLoginAttempts: 0,
+      },
+    });
+    await newUser.save();
+
+    // Tạo profile cho người dùng (nếu cần)
+    const newProfile = new Profile({
+      userId: newUser._id,
+      isName,
+      selectedAge,
+      isGender,
+      imageUrl,
+      isJob,
+      address,
+      isDescription,
+      tags,
+      chipsData,
+      isLanguage,
+      listMatched,
+      listMessenger,
+    });
+    await newProfile.save();
+
+    // Tạo JWT
+    const token = jwt.sign(
+      { id: newUser._id },
+      process.env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(201).json({
+      message: "Người dùng đã được tạo thành công",
+      token,
+      user: newUser,
+      profile: newProfile,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi server", error });
+  }
+});
+
 export default router;
